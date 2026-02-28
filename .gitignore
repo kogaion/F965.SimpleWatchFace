@@ -1,0 +1,24 @@
+# Build output
+bin/
+*.prg
+*.prg.debug
+
+# Eclipse / SDK generated
+.project
+.classpath
+.settings/
+
+# VS Code - păstrăm doar settings relevante
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Developer key - NU o pune niciodată pe GitHub!
+*.der
+*.pem
