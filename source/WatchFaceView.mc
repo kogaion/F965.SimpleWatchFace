@@ -3,6 +3,8 @@ import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Math;
+import Toybox.Time;
+import Toybox.Time.Gregorian;
 
 class WatchFaceView extends WatchUi.WatchFace {
 
@@ -18,7 +20,6 @@ class WatchFaceView extends WatchUi.WatchFace {
     function onShow() as Void {
     }
 
-    // Returnează cele 3 puncte ale limbii: [bazaStanga, bazaDreapta, varf]
     function getHandPoints(cx as Number, cy as Number, angle as Float, len as Number, halfW as Float) as Array {
         var perpX = (-Math.sin(angle) * halfW);
         var perpY = ( Math.cos(angle) * halfW);
@@ -26,25 +27,29 @@ class WatchFaceView extends WatchUi.WatchFace {
         var tipY  = cy + (len * Math.sin(angle)).toNumber();
 
         return [
-            [cx + perpX.toNumber(), cy + perpY.toNumber()], // baza stanga
-            [cx - perpX.toNumber(), cy - perpY.toNumber()], // baza dreapta
-            [tipX, tipY]                                     // varf ascutit
+            [cx + perpX.toNumber(), cy + perpY.toNumber()],
+            [cx - perpX.toNumber(), cy - perpY.toNumber()],
+            [tipX, tipY]
         ];
     }
 
-    // Mod activ: umple forma
     function drawHandFilled(dc as Dc, cx as Number, cy as Number, angle as Float, len as Number, halfW as Float) as Void {
         var pts = getHandPoints(cx, cy, angle, len, halfW);
         dc.fillPolygon(pts);
     }
 
-    // Sleep mode: conturul aceleiasi forme
     function drawHandOutline(dc as Dc, cx as Number, cy as Number, angle as Float, len as Number, halfW as Float) as Void {
         var pts = getHandPoints(cx, cy, angle, len, halfW);
         dc.setPenWidth(1);
-        dc.drawLine(pts[0][0], pts[0][1], pts[1][0], pts[1][1]); // baza
-        dc.drawLine(pts[0][0], pts[0][1], pts[2][0], pts[2][1]); // stanga → varf
-        dc.drawLine(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); // dreapta → varf
+        dc.drawLine(pts[0][0], pts[0][1], pts[1][0], pts[1][1]);
+        dc.drawLine(pts[0][0], pts[0][1], pts[2][0], pts[2][1]);
+        dc.drawLine(pts[1][0], pts[1][1], pts[2][0], pts[2][1]);
+    }
+
+    function getMonthAbbr(month as Number) as String {
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return months[month - 1];
     }
 
     function onUpdate(dc as Dc) as Void {
@@ -62,6 +67,20 @@ class WatchFaceView extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         dc.setPenWidth(3);
         dc.drawCircle(centerX, centerY, radius);
+
+        // --- Data curenta MMM DD ---
+        if (_isAwake) {
+            var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+            var dateStr = Lang.format("$1$ $2$", [getMonthAbbr(today.month), today.day.format("%02d")]);
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(
+                centerX,
+                centerY - (radius * 0.55).toNumber(), // sus, deasupra centrului
+                Graphics.FONT_XTINY,
+                dateStr,
+                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+            );
+        }
 
         // --- Marcaje ore + cifre 12, 3, 6, 9 ---
         var hourLabels = {0 => "12", 3 => "3", 6 => "6", 9 => "9"};
@@ -102,11 +121,9 @@ class WatchFaceView extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
         if (_isAwake) {
-            // --- Activ: limbi pline ---
             drawHandFilled(dc, centerX, centerY, hourAngle,   hourLen,   6.0f);
             drawHandFilled(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
 
-            // Secundar roșu
             dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
             dc.setPenWidth(2);
             dc.drawLine(
@@ -115,19 +132,16 @@ class WatchFaceView extends WatchUi.WatchFace {
                 centerY + (secondLen * Math.sin(secondAngle)).toNumber()
             );
 
-            // Punct central
             dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(centerX, centerY, 5);
             dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(centerX, centerY, 3);
 
         } else {
-            // --- Sleep: conturul aceleiasi forme ---
             dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
             drawHandOutline(dc, centerX, centerY, hourAngle,   hourLen,   6.0f);
             drawHandOutline(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
 
-            // Punct central mic
             dc.fillCircle(centerX, centerY, 3);
         }
     }
