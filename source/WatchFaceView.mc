@@ -219,9 +219,11 @@ class WatchFaceView extends WatchUi.WatchFace {
         dc.clear();
 
         // --- Cerc exterior cadran ---
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.setPenWidth(3);
-        dc.drawCircle(centerX, centerY, radius);
+        if (_isAwake) {
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.setPenWidth(3);
+            dc.drawCircle(centerX, centerY, radius);
+        }
 
         // --- Data curenta DOW DD ---
         if (_isAwake) {
@@ -293,8 +295,9 @@ class WatchFaceView extends WatchUi.WatchFace {
             var innerX = centerX + ((radius - 12) * Math.cos(angle)).toNumber();
             var innerY = centerY + ((radius - 12) * Math.sin(angle)).toNumber();
 
-            dc.setColor(i % 3 == 0 ? Graphics.COLOR_RED : 0x00AAFF, Graphics.COLOR_TRANSPARENT);
-            dc.setPenWidth(i % 3 == 0 ? 4 : 1);
+            dc.setColor(i % 3 == 0 && _isAwake ? Graphics.COLOR_RED : 0x00AAFF, Graphics.COLOR_TRANSPARENT);
+            // dc.setPenWidth(i % 3 == 0 ? 4 : 1);
+            dc.setPenWidth(4);
             dc.drawLine(innerX, innerY, outerX, outerY);
             // dc.setColor(0x00AAFF, Graphics.COLOR_TRANSPARENT);
 
@@ -342,10 +345,12 @@ class WatchFaceView extends WatchUi.WatchFace {
 
         } else {
             // dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-            drawHandOutline(dc, centerX, centerY, hourAngle,   hourLen,   6.0f);
-            drawHandOutline(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
-
-            dc.fillCircle(centerX, centerY, 3);
+            // drawHandOutline(dc, centerX, centerY, hourAngle,   hourLen,   6.0f);
+            // drawHandOutline(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
+            drawHandFilled(dc, centerX, centerY, hourAngle,   hourLen,   6.0f);
+            drawHandFilled(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
+            dc.fillCircle(centerX, centerY, 5);
+            // dc.fillCircle(centerX, centerY, 3);
         }
     }
 
