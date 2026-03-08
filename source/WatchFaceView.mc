@@ -218,13 +218,6 @@ class WatchFaceView extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
 
-        // --- Cerc exterior cadran ---
-        if (_isAwake) {
-            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-            dc.setPenWidth(3);
-            dc.drawCircle(centerX, centerY, radius);
-        }
-
         // --- Data curenta DOW DD ---
         if (_isAwake) {
             var labelRadius = radius - 28;
@@ -351,6 +344,13 @@ class WatchFaceView extends WatchUi.WatchFace {
             drawHandFilled(dc, centerX, centerY, minuteAngle, minuteLen, 4.0f);
             dc.fillCircle(centerX, centerY, 5);
             // dc.fillCircle(centerX, centerY, 3);
+        }
+
+        // --- Cerc exterior cadran ---
+        if (_isAwake) {
+            dc.setColor(0x00AAFF, Graphics.COLOR_TRANSPARENT);
+            dc.setPenWidth(3);
+            dc.drawCircle(centerX, centerY, radius);
         }
     }
 
